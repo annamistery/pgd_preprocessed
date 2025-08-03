@@ -103,8 +103,7 @@ with st.expander("Введите данные для анализа", expanded=T
                 main_cup_data, tasks_data, periods_data = calculation_result
                 
                 try:
-                    # Класс PersonalityProcessor ожидает словарь, где основной словарь находится
-                    # под ключом, а не просто сам словарь.
+                    # ИСПРАВЛЕНИЕ: Оборачиваем данные в словарь, как ожидает PersonalityProcessor
                     wrapped_cup_data = {'Основная чашка': main_cup_data}
                     processor = PersonalityProcessor(wrapped_cup_data)
                     
@@ -172,8 +171,7 @@ if st.session_state.results:
     st.header("Подробное описание по точкам")
     for key, value in st.session_state.results.items():
         with st.expander(f"**{key}**"):
-            # Используем st.markdown, так как он корректно отображает
-            # Markdown-разметку из вашего PersonalityProcessor
+            # st.markdown правильно выводит текст с Markdown-разметкой из вашего класса
             st.markdown(value)
 
 else:
