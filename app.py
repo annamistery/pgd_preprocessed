@@ -144,7 +144,7 @@ if st.session_state.results:
     
     st.write("---")
 
-    # --- Блок для отображения сводных данных (без изменений, т.к. Streamlit сам адаптирует) ---
+    # --- Блок для отображения сводных данных (без изменений) ---
     st.header("Сводные данные по матрице")
     col_tasks, col_periods = st.columns(2)
 
@@ -168,10 +168,13 @@ if st.session_state.results:
 
     st.write("---")
     
-    # Блок с подробным описанием
+    # --- ИСПРАВЛЕННЫЙ БЛОК: Подробное описание в раскрывающихся элементах ---
     st.header("Подробное описание по точкам")
     for key, value in st.session_state.results.items():
         with st.expander(f"**{key}**"):
+            # Используем st.markdown, так как он корректно отображает
+            # Markdown-разметку из вашего PersonalityProcessor
             st.markdown(value)
+
 else:
     st.info("Заполните данные и нажмите 'Рассчитать', чтобы увидеть результат.")
