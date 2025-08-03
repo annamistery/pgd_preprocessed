@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Импортируем ваши классы
 from cashka_preprocessor import PersonalityProcessor
-from pgd_bot import PGD_Person_Mod # Убедитесь, что pgd_bot.py в той же папке
+from pgd_bot import PGD_Person_Mod
 
 # --- Вспомогательные функции ---
 
