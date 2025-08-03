@@ -34,7 +34,6 @@ def perform_full_calculation(name: str, dob: datetime, gender: str) -> tuple | N
             st.error(f"Ошибка при расчете основной матрицы: {main_cup_data}")
             return None
 
-        # 5. Возвращаем все данные
         return main_cup_data, tasks_data, periods_data
 
     except Exception as e:
@@ -64,8 +63,7 @@ def format_results_for_download(name: str, dob: datetime, results: dict, tasks: 
     # Добавляем основное описание
     main_content = "\n--- Подробное описание ---\n"
     for key, value in results.items():
-        # Здесь мы используем чистый текст, полученный из PersonalityProcessor
-        clean_value = value
+        clean_value = value.replace('**', '').replace('\n\n', '\n')
         main_content += f"\n--- {key} ---\n{clean_value}\n"
     
     return header + tasks_content + periods_content + main_content
@@ -83,9 +81,8 @@ if 'results' not in st.session_state:
     st.session_state.periods = None
     st.session_state.processing_time = 0
 
-# --- Блок ввода данных для мобильных устройств (удобнее в expander) ---
-# Заменяем st.sidebar на st.expander
-with st.expander("Введите данные для анализа", expanded=True):
+with st.sidebar:
+    st.header("Введите данные для анализа")
     name = st.text_input("Имя", placeholder="Например, Анастасия")
     dob = st.date_input("Дата рождения", value=None, min_value=datetime(1930, 1, 1), format="DD.MM.YYYY")
     gender = st.radio("Пол", ('Женский', 'Мужской'), horizontal=True)
@@ -97,18 +94,18 @@ with st.expander("Введите данные для анализа", expanded=T
             progress_bar = st.progress(0, text="Подготовка к анализу...")
             start_time = time.monotonic()
             
+            # 1. Выполняем полный расчет
             calculation_result = perform_full_calculation(name, dob, gender)
             
             if calculation_result:
                 main_cup_data, tasks_data, periods_data = calculation_result
                 
+                # 2. Обрабатываем основную чашку через PersonalityProcessor
                 try:
-                    # ИСПРАВЛЕНИЕ: Оборачиваем данные в словарь, как ожидает PersonalityProcessor
-                    wrapped_cup_data = {'Основная чашка': main_cup_data}
-                    processor = PersonalityProcessor(wrapped_cup_data)
+                    processor = PersonalityProcessor(main_cup_data)
+                    results = processor.get_full_description() #progress_callback=lambda p, t: progress_bar.progress(p, text=t)
                     
-                    results = processor.get_full_description()
-                    
+                    # 3. Сохраняем все результаты в сессии
                     st.session_state.results = results
                     st.session_state.tasks = tasks_data
                     st.session_state.periods = periods_data
@@ -119,6 +116,7 @@ with st.expander("Введите данные для анализа", expanded=T
                     st.error(f"Произошла ошибка на этапе обработки описаний: {e}")
                     st.session_state.results = None
             else:
+                # Если расчет не удался, очищаем все
                 progress_bar.empty()
                 st.session_state.results = None
 
@@ -171,7 +169,8 @@ if st.session_state.results:
     st.header("Подробное описание по точкам")
     for key, value in st.session_state.results.items():
         with st.expander(f"**{key}**"):
-            # st.markdown правильно выводит текст с Markdown-разметкой из вашего класса
+            # Используем st.markdown, так как он корректно отображает
+            # Markdown-разметку из вашего PersonalityProcessor
             st.markdown(value)
 
 else:
